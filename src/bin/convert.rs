@@ -15,16 +15,18 @@ fn main() -> io::Result<()> {
             io::stdin().lock().read_to_end(&mut buf_in)?;
 
             let begin_de = Instant::now();
-            let value: serde_json::Value = match &format_in[..] {
+            let builder: flexbuffers::Builder = match &format_in[..] {
                 "json" => serde_json::from_slice(&buf_in)?,
                 "flexbuffer" => flexbuffers::from_slice(&buf_in).unwrap(),
                 _ => panic!("invalid arg format_in"),
             };
 
             let begin_ser = Instant::now();
+            let buffer = builder.view();
+            let reader = flexbuffers::Reader::get_root(buffer).unwrap();
             let buf_out = match &format_out[..] {
-                "json" => serde_json::to_vec(&value)?,
-                "flexbuffer" => flexbuffers::to_vec(&value).unwrap(),
+                "json" => serde_json::to_vec(&reader)?,
+                "flexbuffer" => flexbuffers::to_vec(&reader).unwrap(),
                 _ => panic!("invalid arg format_out"),
             };
             let end_ser = Instant::now();
