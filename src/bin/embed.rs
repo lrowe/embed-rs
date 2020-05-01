@@ -11,8 +11,7 @@ use std::io::{self, Write};
 use std::path::Path;
 use std::time::Instant;
 
-mod deepcopy;
-mod embed;
+use embed::embed::embed;
 
 // Build with --features=logging_allocator and run with env RUST_LOG=trace to log allocations.
 #[cfg(feature = "logging_allocator")]
@@ -69,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         log::trace!("begin_embed");
         let begin_embed = Instant::now();
-        embed::embed(&frame, &root, &mut builder, |key| {
+        embed(&frame, &root, &mut builder, |key| {
             txn.get(db, &key).map_err(|e| {
                 log::error!("in:load error:{:?} key:{} root:{} ", e, key, root);
                 e
