@@ -4,6 +4,7 @@ extern crate flexbuffers;
 extern crate lmdb;
 extern crate log;
 extern crate serde_json;
+extern crate serde_transcode;
 use lmdb::Transaction;
 
 use std::fs;
@@ -83,7 +84,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let size = data.len();
         if output_json {
             let value = flexbuffers::Reader::get_root(data).unwrap();
-            serde_json::to_writer(&mut out, &value)?;
+            let mut jsonser = serde_json::Serializer::new(&mut out);
+            serde_transcode::transcode(value, &mut jsonser).unwrap();
             out.write_all(b"\n")?;
         } else {
             out.write_all(data)?;
